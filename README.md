@@ -10,7 +10,7 @@ import "github.com/ottogiron/chapi/server"
 
 #### Installation
 ```bash
-go get github.com/ottogiron/chapi (didn't test this)
+go get github.com/ottogiron/chapi
 ```
 
 #### server.Server
