@@ -1,15 +1,20 @@
 package server
 
-import "reflect"
+import "github.com/satori/go.uuid"
 
 type Plugin interface {
 	Register(server Server)
-	GetDependencies() []reflect.Type
+	Dependencies() []string
+	Name() string
 }
 
 type BasePlugin struct {
 }
 
-func (basePlugin *BasePlugin) GetDependencies() []reflect.Type {
-	return []reflect.Type{}
+func (basePlugin *BasePlugin) Dependencies() []string {
+	return []string{}
+}
+
+func (basePlugin *BasePlugin) Name() string {
+	return uuid.NewV4().String()
 }

@@ -1,8 +1,8 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
-	"reflect"
 )
 
 type Server interface {
@@ -12,19 +12,26 @@ type Server interface {
 }
 
 type baseServer struct {
-	plugins []Plugin
+	plugins map[string]Plugin
 }
 
 func (baseServer *baseServer) Register(plugin Plugin) {
-	baseServer.plugins = append(baseServer.plugins, plugin)
+
+	_, containsKey := baseServer.plugins[plugin.Name()]
+
+	if containsKey {
+		panic(fmt.Sprint("Plugin already registered:%s", plugin.Name()))
+	}
+
+	baseServer.plugins[plugin.Name()] = plugin
 }
 
-func (baseServer *baseServer) registerPlugins(plugins []Plugin, server Server) {
+func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server Server) {
 
-	processedPluginType := new(map[reflect.Type][]bool)
+	processedPluginType := new(map[string][]bool)
 
 	for _, plugin := range plugins {
-		pluginDendencies := plugin.GetDependencies()
+		pluginDendencies := plugin.Dependencies()
 		depLen := len(pluginDendencies)
 		if depLen == 0 {
 			plugin.Register(server)
@@ -38,7 +45,7 @@ func (baseServer *baseServer) registerPlugins(plugins []Plugin, server Server) {
 	}
 }
 
-func pluginDependencyMeet(plugin Plugin, processedPluginType *map[reflect.Type][]bool) bool {
+func pluginDependencyMeet(plugin Plugin, processedPluginType *map[string][]bool) bool {
 
 	return true
 }
