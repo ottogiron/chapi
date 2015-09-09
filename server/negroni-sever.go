@@ -16,6 +16,7 @@ func NewServer() Server {
 	n := negroni.Classic()
 	router := newRouter()
 	baseServer := &baseServer{}
+	baseServer.plugins = make(map[string]Plugin)
 	ns := negroniServer{n, router, baseServer}
 	n.UseHandler(router)
 	return ns
