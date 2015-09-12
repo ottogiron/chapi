@@ -21,7 +21,7 @@ func (helloController *HelloController) Name() string {
 }
 
 func (helloController *HelloController) Dependencies() []string {
-	return []string{"HelloDepp"}
+	return []string{"HelloDep"}
 }
 
 func handleHello(w http.ResponseWriter, r *http.Request) {
