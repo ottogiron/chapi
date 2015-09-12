@@ -75,11 +75,11 @@ type HelloDepController struct {
 	*server.BasePlugin
 }
 
-func (helloDep *HelloDep) Name() string {
+func (helloDep *HelloDepController) Name() string {
 	return "HelloDep"
 }
 
-func (helloDep *HelloDep) Register(server server.Server) {
+func (helloDep *HelloDepController) Register(server server.Server) {
 	server.HandleFunc("/hellodep", handleHelloDep).Methods("GET")
 }
 
@@ -89,10 +89,10 @@ func handleHelloDep(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	connectionString := ":8080" 
+	connectionString := ":8080"
 	s := server.NewServer()
 	s.Register(&HelloController{})
-	s.Register(&HelloDep{})
+	s.Register(&HelloDepController{})
 	runError := s.Run(connectionString)
 	if runError != nil {
 		fmt.Println("Error when running server", runError)
