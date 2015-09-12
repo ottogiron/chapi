@@ -30,43 +30,42 @@ func (baseServer *baseServer) Register(plugin Plugin) error {
 	return nil
 }
 
-func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server Server) error {
-
-	processedPlugins := make(map[string]bool)
+func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server Server, processedPlugins map[string]bool) error {
 
 	for _, plugin := range plugins {
 		dependenciesNames := plugin.Dependencies()
 		depLen := len(dependenciesNames)
-		if depLen == 0 {
-			plugin.Register(server)
-		} else {
-			meet := pluginDependencyMeet(plugin, processedPlugins)
-			if meet {
+		if !processedPlugins[plugin.Name()] {
+			if depLen == 0 {
 				plugin.Register(server)
 			} else {
-
-				dependencies := make(map[string]Plugin)
-				for _, currentDependency := range dependenciesNames {
-
-					if plugins[currentDependency] != nil {
-						if currentDependency != plugin.Name() {
-							dependencies[currentDependency] = plugins[currentDependency]
-						} else {
-							unmetDependenciesMsg := "Circular dependency %s"
-							return fmt.Errorf(unmetDependenciesMsg, plugin.Name())
-						}
-					} else {
-						unmetDependenciesMsg := "Dependencies for %s is unmet %s"
-						return fmt.Errorf(unmetDependenciesMsg, plugin.Name(), currentDependency)
-					}
-
-					baseServer.registerPlugins(dependencies, server)
+				meet := pluginDependencyMeet(plugin, processedPlugins)
+				if meet {
 					plugin.Register(server)
+				} else {
+
+					dependencies := make(map[string]Plugin)
+					for _, currentDependency := range dependenciesNames {
+
+						if plugins[currentDependency] != nil {
+							if currentDependency != plugin.Name() {
+								dependencies[currentDependency] = plugins[currentDependency]
+							} else {
+								unmetDependenciesMsg := "Circular dependency %s"
+								return fmt.Errorf(unmetDependenciesMsg, plugin.Name())
+							}
+						} else {
+							unmetDependenciesMsg := "Dependencies for %s is unmet %s"
+							return fmt.Errorf(unmetDependenciesMsg, plugin.Name(), currentDependency)
+						}
+
+						baseServer.registerPlugins(dependencies, server, processedPlugins)
+						plugin.Register(server)
+					}
 				}
 			}
+			processedPlugins[plugin.Name()] = true
 		}
-
-		processedPlugins[plugin.Name()] = true
 
 	}
 	return nil

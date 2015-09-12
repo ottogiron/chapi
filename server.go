@@ -13,6 +13,7 @@ type HelloController struct {
 }
 
 func (helloController *HelloController) Register(server server.Server) {
+	fmt.Println("Registering HelloController")
 	server.HandleFunc("/", handleHello).Methods("GET")
 }
 
@@ -37,6 +38,7 @@ func (helloDep *HelloDep) Name() string {
 }
 
 func (helloDep *HelloDep) Register(server server.Server) {
+	fmt.Println("Registering HelloDepController")
 	server.HandleFunc("/hellodep", handleHelloDep).Methods("GET")
 }
 

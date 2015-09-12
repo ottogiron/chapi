@@ -23,7 +23,8 @@ func NewServer() Server {
 }
 
 func (server negroniServer) Run(addr string) error {
-	serverRegisterError := server.registerPlugins(server.plugins, server)
+	processedPlugins := make(map[string]bool)
+	serverRegisterError := server.registerPlugins(server.plugins, server, processedPlugins)
 	if serverRegisterError != nil {
 		return serverRegisterError
 	}
