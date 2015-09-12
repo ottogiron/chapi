@@ -43,7 +43,6 @@ func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server 
 			meet := pluginDependencyMeet(plugin, processedPlugins)
 			if meet {
 				plugin.Register(server)
-				processedPlugins[plugin.Name()] = true
 			} else {
 
 				dependencies := make(map[string]Plugin)
@@ -66,6 +65,8 @@ func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server 
 				}
 			}
 		}
+
+		processedPlugins[plugin.Name()] = true
 
 	}
 	return nil
