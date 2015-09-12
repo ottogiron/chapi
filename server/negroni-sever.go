@@ -22,9 +22,13 @@ func NewServer() Server {
 	return ns
 }
 
-func (server negroniServer) Run(addr string) {
-	server.registerPlugins(server.plugins, server)
+func (server negroniServer) Run(addr string) error {
+	serverRegisterError := server.registerPlugins(server.plugins, server)
+	if serverRegisterError != nil {
+		return serverRegisterError
+	}
 	server.Negroni.Run(addr)
+	return nil
 }
 
 func (server negroniServer) HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) *route {

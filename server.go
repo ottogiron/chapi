@@ -21,7 +21,7 @@ func (helloController *HelloController) Name() string {
 }
 
 func (helloController *HelloController) Dependencies() []string {
-	return []string{"HelloController"}
+	return []string{"HelloDep"}
 }
 
 func handleHello(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func (helloDep *HelloDep) Name() string {
 }
 
 func (helloDep *HelloDep) Register(server server.Server) {
-	server.HandleFunc("/hellodep", handleHello).Methods("GET")
+	server.HandleFunc("/hellodep", handleHelloDep).Methods("GET")
 }
 
 func main() {
@@ -46,6 +46,9 @@ func main() {
 	s := server.NewServer()
 	s.Register(&HelloController{})
 	s.Register(&HelloDep{})
-	s.Run(connectionString)
+	runError := s.Run(connectionString)
+	if runError != nil {
+		fmt.Println("Error when running server", runError)
+	}
 
 }

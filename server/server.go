@@ -1,13 +1,14 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
 
 type Server interface {
-	Run(addr string)
-	Register(plugin Plugin)
+	Run(addr string) error
+	Register(plugin Plugin) error
 	HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) *route
 }
 
@@ -15,19 +16,21 @@ type baseServer struct {
 	plugins map[string]Plugin
 }
 
-func (baseServer *baseServer) Register(plugin Plugin) {
+func (baseServer *baseServer) Register(plugin Plugin) error {
 
 	_, containsKey := baseServer.plugins[plugin.Name()]
 
 	if containsKey {
 		alreadyRegisteredMsg := "Plugin already registered:%s"
-		panic(fmt.Sprint(alreadyRegisteredMsg, plugin.Name()))
+		return errors.New(fmt.Sprint(alreadyRegisteredMsg, plugin.Name()))
 	}
 
 	baseServer.plugins[plugin.Name()] = plugin
+
+	return nil
 }
 
-func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server Server) {
+func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server Server) error {
 
 	processedPlugins := make(map[string]bool)
 
@@ -44,19 +47,20 @@ func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server 
 			} else {
 
 				dependencies := make(map[string]Plugin)
-				for _, name := range dependenciesNames {
+				for _, currentDependency := range dependenciesNames {
 
-					if plugins[name] != nil {
-						currDep := plugins[plugin.Name()].Name()
-						if currDep != plugin.Name() {
-							dependencies[name] = plugins[name]
+					if plugins[currentDependency] != nil {
+						if currentDependency != plugin.Name() {
+							dependencies[currentDependency] = plugins[currentDependency]
 						} else {
-
+							unmetDependenciesMsg := "Circular dependency %s"
+							return fmt.Errorf(unmetDependenciesMsg, plugin.Name())
 						}
 					} else {
 						unmetDependenciesMsg := "Dependencies for %s are unmet"
-						panic(fmt.Sprintf(unmetDependenciesMsg, plugin.Name()))
+						return fmt.Errorf(unmetDependenciesMsg, plugin.Name())
 					}
+
 					baseServer.registerPlugins(dependencies, server)
 					plugin.Register(server)
 				}
@@ -64,6 +68,7 @@ func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server 
 		}
 
 	}
+	return nil
 }
 
 func pluginDependencyMeet(plugin Plugin, processedPlugins map[string]bool) bool {
