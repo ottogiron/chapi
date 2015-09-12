@@ -21,7 +21,7 @@ func (helloController *HelloController) Name() string {
 }
 
 func (helloController *HelloController) Dependencies() []string {
-	return []string{"HelloDep"}
+	return []string{"HelloDepp"}
 }
 
 func handleHello(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +38,10 @@ func (helloDep *HelloDep) Name() string {
 
 func (helloDep *HelloDep) Register(server server.Server) {
 	server.HandleFunc("/hellodep", handleHelloDep).Methods("GET")
+}
+
+func handleHelloDep(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Hello Chapi Dep")
 }
 
 func main() {

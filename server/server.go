@@ -57,8 +57,8 @@ func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server 
 							return fmt.Errorf(unmetDependenciesMsg, plugin.Name())
 						}
 					} else {
-						unmetDependenciesMsg := "Dependencies for %s are unmet"
-						return fmt.Errorf(unmetDependenciesMsg, plugin.Name())
+						unmetDependenciesMsg := "Dependencies for %s is unmet %s"
+						return fmt.Errorf(unmetDependenciesMsg, plugin.Name(), currentDependency)
 					}
 
 					baseServer.registerPlugins(dependencies, server)
