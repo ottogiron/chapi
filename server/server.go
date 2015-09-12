@@ -47,12 +47,18 @@ func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server 
 				for _, name := range dependenciesNames {
 
 					if plugins[name] != nil {
-						dependencies[name] = plugins[name]
+						currDep := plugins[plugin.Name()].Name()
+						if currDep != plugin.Name() {
+							dependencies[name] = plugins[name]
+						} else {
+
+						}
 					} else {
 						unmetDependenciesMsg := "Dependencies for %s are unmet"
 						panic(fmt.Sprintf(unmetDependenciesMsg, plugin.Name()))
 					}
 					baseServer.registerPlugins(dependencies, server)
+					plugin.Register(server)
 				}
 			}
 		}

@@ -1,6 +1,10 @@
 package server
 
-import "github.com/satori/go.uuid"
+import (
+	"fmt"
+
+	"github.com/satori/go.uuid"
+)
 
 type Plugin interface {
 	Register(server Server)
@@ -12,6 +16,7 @@ type BasePlugin struct {
 }
 
 func (basePlugin *BasePlugin) Dependencies() []string {
+	fmt.Println("Calling this from base")
 	return []string{}
 }
 
