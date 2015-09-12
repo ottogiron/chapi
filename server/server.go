@@ -20,7 +20,8 @@ func (baseServer *baseServer) Register(plugin Plugin) {
 	_, containsKey := baseServer.plugins[plugin.Name()]
 
 	if containsKey {
-		panic(fmt.Sprint("Plugin already registered:%s", plugin.Name()))
+		alreadyRegisteredMsg := "Plugin already registered:%s"
+		panic(fmt.Sprint(alreadyRegisteredMsg, plugin.Name()))
 	}
 
 	baseServer.plugins[plugin.Name()] = plugin
@@ -28,24 +29,43 @@ func (baseServer *baseServer) Register(plugin Plugin) {
 
 func (baseServer *baseServer) registerPlugins(plugins map[string]Plugin, server Server) {
 
-	processedPluginType := new(map[string][]bool)
+	processedPlugins := make(map[string]bool)
 
 	for _, plugin := range plugins {
-		pluginDendencies := plugin.Dependencies()
-		depLen := len(pluginDendencies)
+		dependenciesNames := plugin.Dependencies()
+		depLen := len(dependenciesNames)
 		if depLen == 0 {
 			plugin.Register(server)
 		} else {
-			meet := pluginDependencyMeet(plugin, processedPluginType)
+			meet := pluginDependencyMeet(plugin, processedPlugins)
 			if meet {
 				plugin.Register(server)
+				processedPlugins[plugin.Name()] = true
+			} else {
+
+				dependencies := make(map[string]Plugin)
+				for _, name := range dependenciesNames {
+
+					if plugins[name] != nil {
+						dependencies[name] = plugins[name]
+					} else {
+						unmetDependenciesMsg := "Dependencies for %s are unmet"
+						panic(fmt.Sprintf(unmetDependenciesMsg, plugin.Name()))
+					}
+					baseServer.registerPlugins(dependencies, server)
+				}
 			}
 		}
 
 	}
 }
 
-func pluginDependencyMeet(plugin Plugin, processedPluginType *map[string][]bool) bool {
+func pluginDependencyMeet(plugin Plugin, processedPlugins map[string]bool) bool {
 
+	for _, name := range plugin.Dependencies() {
+		if !processedPlugins[name] {
+			return false
+		}
+	}
 	return true
 }
